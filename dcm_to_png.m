@@ -11,10 +11,11 @@ for i = 3:length(dir_list) %1 is ., 2 is .., 3 is content
     
     %load dicom
     dicom_i = dicomread(path_dcm_i);
-    dicom_i_cast = cast(dicom_i, 'double')/1024; %re-scaling to make the image visible
+    dicom_i_cast = cast(dicom_i, 'uint16');
+    dicom_i_re = imadjust(dicom_i_cast); %re-scaling to make the image visible
     
     %make png
-    imwrite(dicom_i_cast, path_image_i);
+    imwrite(dicom_i_re, path_image_i);
 end
 
 %convert ocontour dicom
@@ -28,10 +29,11 @@ for i = 3:length(dir_list) %1 is ., 2 is .., 3 is content
     
     %load dicom
     dicom_o = dicomread(path_dcm_o);
-    dicom_o_cast = cast(dicom_o, 'double')/1024;
+    dicom_o_cast = cast(dicom_o, 'uint16');
+    dicom_o_re = imadjust(dicom_o_cast); %re-scaling to make the image visible
     
     %make png
-    imwrite(dicom_o_cast, path_image_o); %re-scaling to make the image visible
+    imwrite(dicom_o_re, path_image_o);
 end
 
 %convert pcontour dicom
@@ -45,8 +47,9 @@ for i = 3:length(dir_list) %1 is ., 2 is .., 3 is content
     
     %load dicom
     dicom_p = dicomread(path_dcm_p);
-    dicom_p_cast = cast(dicom_p, 'double')/1024; %re-scaling to make the image visible
+    dicom_p_cast = cast(dicom_p, 'uint16');
+    dicom_p_re = imadjust(dicom_p_cast); %re-scaling to make the image visible
     
     %make png
-    imwrite(dicom_p_cast, path_image_p);
+    imwrite(dicom_p_re, path_image_p);
 end

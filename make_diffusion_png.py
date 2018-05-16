@@ -31,12 +31,31 @@ for location in where:
     img_filtered12 = anisotropic_diffusion(img, niter=12)
 
     #don't need to worry about flipping
-    #plt.imshow(img_filtered1, cmap = 'gray')
-    #plt.show()
-    #plt.imshow(img_filtered2, cmap = 'gray')
-    #plt.show()
     #plt.imshow(img_filtered3, cmap = 'gray')
     #plt.show()
+    #plt.imshow(img_filtered6, cmap = 'gray')
+    #plt.show()
+    #plt.imshow(img_filtered9, cmap = 'gray')
+    #plt.show()
+
+    print(type(img_filtered3))
+
+    N_TEST_IMG = 2 # code should be changed if the # is 1
+    f, a = plt.subplots(3, N_TEST_IMG, figsize=(5,3))
+
+    for i in range(N_TEST_IMG):
+        a[0][i].imshow(img_filtered3, cmap = 'gray')
+        a[0][i].set_xticks(())
+        a[0][i].set_yticks(())
+        a[1][i].imshow(img_filtered6, cmap = 'gray')
+        a[1][i].set_xticks(())
+        a[1][i].set_yticks(())
+        a[2][i].imshow(img_filtered9, cmap = 'gray')
+        a[2][i].set_xticks(())
+        a[2][i].set_yticks(())
+    plt.show()
+    break
+"""
     img_filtered3 = img_filtered3.astype('uint8')
     img_filtered6 = img_filtered6.astype('uint8')
     img_filtered9 = img_filtered9.astype('uint8')
@@ -51,3 +70,4 @@ for location in where:
     save(img_filtered6, path6, image_header)
     save(img_filtered9, path9, image_header)
     save(img_filtered12, path12, image_header)
+"""
