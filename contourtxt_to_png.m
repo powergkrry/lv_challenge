@@ -4,10 +4,11 @@
 dir_list = dir('/hoem04/powergkrry/lv_challenge/data/icontour_txt');
 mkdir /hoem04/powergkrry/lv_challenge/data/icontour_png
 
+image_order = 1;
 for i = 3:length(dir_list) %1 is ., 2 is .., 3 is content
     path_coor_i = strcat('/hoem04/powergkrry/lv_challenge/data/icontour_txt/', dir_list(i).name); %mask txt path to load
     image_name_i = dir_list(i).name(1:12);
-    path_image_i = strcat('/hoem04/powergkrry/lv_challenge/data/icontour_png/', image_name_i, '-icon.png'); %png image path to save
+    path_image_i = strcat('/hoem04/powergkrry/lv_challenge/data/icontour_png/', num2str(image_order), '.png'); %png image path to save
     
     %load icontour .txt
     coordinates_i = fopen(path_coor_i, 'r');
@@ -22,16 +23,18 @@ for i = 3:length(dir_list) %1 is ., 2 is .., 3 is content
     
     %save image
     imwrite(mask_i_cast, path_image_i);
+    image_order = image_order + 1;
 end
 
 %convert ocontour
 dir_list = dir('/hoem04/powergkrry/lv_challenge/data/ocontour_txt');
 mkdir /hoem04/powergkrry/lv_challenge/data/ocontour_png
 
+image_order = 1;
 for i = 3:length(dir_list) %1 is ., 2 is .., 3 is content
     path_coor_o = strcat('/hoem04/powergkrry/lv_challenge/data/ocontour_txt/', dir_list(i).name); %mask txt path to load
     image_name_o = dir_list(i).name(1:12);
-    path_image_o = strcat('/hoem04/powergkrry/lv_challenge/data/ocontour_png/', image_name_o, '-ocon.png'); %png image path to save
+    path_image_o = strcat('/hoem04/powergkrry/lv_challenge/data/ocontour_png/', num2str(image_order), '.png'); %png image path to save
     
     %load ocontour .txt
     coordinates_o = fopen(path_coor_o, 'r');
@@ -46,6 +49,7 @@ for i = 3:length(dir_list) %1 is ., 2 is .., 3 is content
     
     %save image
     imwrite(mask_o_cast, path_image_o);
+    image_order = image_order + 1;
 end
 
 %convert pcontour
@@ -53,10 +57,11 @@ dir_list = dir('/hoem04/powergkrry/lv_challenge/data/pcontour_txt');
 mkdir /hoem04/powergkrry/lv_challenge/data/pcontour_png
 
 check_multiple_pcontours = 0;
+image_order = 1;
 for i = 3:length(dir_list) %1 is ., 2 is .., 3 is content
     path_coor_p = strcat('/hoem04/powergkrry/lv_challenge/data/pcontour_txt/', dir_list(i).name); %mask txt path to load
     image_name_p = dir_list(i).name(1:12);
-    path_image_p = strcat('/hoem04/powergkrry/lv_challenge/data/pcontour_png/', image_name_p, '-pcon.png'); %png image path to save
+    path_image_p = strcat('/hoem04/powergkrry/lv_challenge/data/pcontour_png/', num2str(image_order), '.png'); %png image path to save
     
     %load pcontour .txt
     coordinates_p = fopen(path_coor_p, 'r');
@@ -65,7 +70,7 @@ for i = 3:length(dir_list) %1 is ., 2 is .., 3 is content
     y = coordinates_p_data{2};
     fclose(coordinates_p);
     
-    %make ocontour mask
+    %make pcontour mask
     if check_multiple_pcontours == 0
         mask_p = poly2mask(x, y, 256, 256); %pcontour mask
     end
@@ -92,4 +97,5 @@ for i = 3:length(dir_list) %1 is ., 2 is .., 3 is content
     %save image
     imwrite(mask_p_cast, path_image_p);
     check_multiple_pcontours = 0; %reset after saving
+    image_order = image_order + 1;
 end

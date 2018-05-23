@@ -35,7 +35,7 @@ for i=1:length(dirname_save1)
                     dst = imdiffusefilt(img,'GradientThreshold',diffusion_gradient(k),'NumberOfIterations',8, 'ConductionMethod',diffusion_conduction(l));
                     dst = imflip(dst, flip(m));
                     
-                    dst = im2uint16(dst);
+                    dst = im2uint8(dst);
                     imwrite(dst, strcat('./', int2str(j-2), '.png'));
                     
                     cd ..
