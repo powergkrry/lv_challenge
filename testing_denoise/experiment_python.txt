@@ -1,0 +1,32 @@
+NLmeans :
+	h - var, 7, 7
+	patchsize - 10, var, 7
+	windowsize - 10, 7, var
+
+Gaussian :
+	kernelsize - var, 0
+	sigmaXY - (5, 5), var
+
+Bilateral :
+	d - var, 75, 75
+	sigmaColor - 10, var, 75
+	sigmaSpace - 10, 50, var (no difference)
+
+Anisotropic :
+	niter - niter=var
+	kappa - niter=16, kappa=var (no difference over 50)
+	gamma - niter=16, gamma=var
+	voxelspacing - niter=16, voxelspacing=var (don't need to consider)
+	option - niter=64, option=var (hard to say)
+
+TotalVariation :
+	weight - weight=var
+	eps - weight=1, max_iter=1000, eps=var
+	isotropic - weight=1, isotropic=var
+
+Wavelet :
+	sigma - 
+	wevelet - 
+	mode - 
+	wavelet_levels - 
+	method - 
