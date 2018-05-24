@@ -38,8 +38,10 @@ def cal_test_error(i):
 
             all_diffusion_test = torch.cat(tensor_list_test[idx],dim=1)
 
-            x_test = Variable(all_diffusion_test).cuda()
-            y__test = Variable(tensor_output_test[idx]).cuda()
+            #x_test = Variable(all_diffusion_test).cuda()
+            x_test = Variable(all_diffusion_test)
+            #y__test = Variable(tensor_output_test[idx]).cuda()
+            y__test = Variable(tensor_output_test[idx])
             y_test = generator.forward(x_test)
             ###y_test = torch.round(y_test)
             y2_test = torch.round(y_test)
@@ -64,8 +66,8 @@ def cal_test_error(i):
         """    
 
     if i == 0:
-        v_utils.save_image(y__test.cpu().data,"./result2/res_img/label_image.png")
-    v_utils.save_image(y2_test.cpu().data,"./result2/res_img/gen_image_{:03d}.png".format(i))
+        v_utils.save_image(y__test.cpu().data,"./result/res_img/label_image.png")
+    v_utils.save_image(y2_test.cpu().data,"./result/res_img/gen_image_{:03d}.png".format(i))
 
 
     test_error_output = loss_sum / (len(iter_output_test)*len(iter_arr_test))
@@ -97,7 +99,7 @@ r_test_error = []
 
 flip = ['_o','_h','_v','hv']
 # input pipeline
-img_dir = "/home/powergkrry/lv_challenge/data/dataset/dataset03/p/train/"
+img_dir = "/home/yeonjee/lv_challenge/data/dataset/dataset01/p/train/"
 # 디렉토리를 4개로 분리시키는 건 어떨까?
 dir_list = [[
     dir_name for dir_name in os.listdir(img_dir) if f == dir_name[-2:]
@@ -119,7 +121,7 @@ img_batch_arr = [[
 ] for img_data_a in img_data_arr]
 
 img_output_arr = folder2.ImageFolder(
-    root="/home/powergkrry/lv_challenge/data/dataset/dataset03/p/train/output",
+    root="/home/yeonjee/lv_challenge/data/dataset/dataset01/p/train/output",
     transform = transforms.Compose([
         fourflip(),
         transforms.Lambda(lambda crops: torch.stack([
@@ -130,7 +132,7 @@ img_output_arr = folder2.ImageFolder(
 img_output_batch_arr = data.DataLoader(img_output_arr, batch_size=batch_size,num_workers=2)
 
 
-img_dir_test = "/home/powergkrry/lv_challenge/data/dataset/dataset03/p/test/"
+img_dir_test = "/home/yeonjee/lv_challenge/data/dataset/dataset01/p/test/"
 
 dir_list_test = [[
     dir_name for dir_name in os.listdir(img_dir_test) if f == dir_name[-2:]
@@ -153,7 +155,7 @@ img_batch_arr_test = [[
 ] for img_data_a_test in img_data_arr_test]
 
 img_output_arr_test = folder2.ImageFolder(
-    root="/home/powergkrry/lv_challenge/data/dataset/dataset03/p/test/output",
+    root="/home/yeonjee/lv_challenge/data/dataset/dataset01/p/test/output",
     transform = transforms.Compose([
         fourflip(),
         transforms.Lambda(lambda crops: torch.stack([
@@ -189,8 +191,8 @@ gen_optimizer = torch.optim.Adam(generator.parameters(),lr=lr)
 
 
 # training
-file = open('./result2/res_error/{}_{}_{}_{:03d}_loss'.format(args.network,args.batch_size,args.lr,args.epoch), 'w')
-logger = Logger('./result2/logs')
+file = open('./result/res_error/{}_{}_{}_{:03d}_loss'.format(args.network,args.batch_size,args.lr,args.epoch), 'w')
+logger = Logger('./result/logs')
 
 for i in range(epoch):
     iter_arr = [[iter(batch) for batch in img_batch_a] for img_batch_a in img_batch_arr]
@@ -210,8 +212,10 @@ for i in range(epoch):
         tensor_output = torch.chunk(tensor_o,chunks=4, dim=1)
         for idx in range(len(iter_arr)):
             all_diffusion = torch.cat(tensor_list[idx],dim=1)
-            x = Variable(all_diffusion).cuda()
-            y_ = Variable(tensor_output[idx]).cuda()
+            #x = Variable(all_diffusion).cuda()
+            x = Variable(all_diffusion)
+            #y_ = Variable(tensor_output[idx]).cuda()
+            y_ = Variable(tensor_output[idx])
             y = generator.forward(x)
             ###y = torch.round(y)
             y2 = torch.round(y)
