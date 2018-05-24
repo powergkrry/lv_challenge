@@ -168,7 +168,8 @@ img_output_batch_arr_test = data.DataLoader(img_output_arr_test, batch_size=batc
 
 # initiate Generator
 if args.network == "fusionnet":
-	generator = nn.DataParallel(FusionGenerator(8,1,64),device_ids=[i for i in range(args.num_gpu)]).cuda()
+	#generator = nn.DataParallel(FusionGenerator(8,1,64),device_ids=[i for i in range(args.num_gpu)]).cuda()
+	generator = nn.DataParallel(FusionGenerator(8,1,64),device_ids=[i for i in range(args.num_gpu)])
 elif args.network == "unet":
 	generator = nn.DataParallel(UnetGenerator(8,1,64),device_ids=[i for i in range(args.num_gpu)]).cuda()
 
