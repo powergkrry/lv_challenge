@@ -6,8 +6,8 @@ contour파일을 무엇과 매칭시킬지 알았으니 contour파일의 이름�
 
 각 contour파일을 contourtxt_to_png.m 으로 png로 변환해 contour_png 폴더에 저장한다.
 
-원본 이미지를 .dcm에서 .png로 변환해야한다. 변환해야 할 dcm파일을 script_for_copy_dcm.txt에 있는 script로 /hoem04/powergkrry/lv_challenge/data/original_dcm 에 복사한다. 그 후 dcm_to_png.m 으로 .png로 변환한다. 이 때 타입은은 uint16이며 이미지 확인을 위해 imadjust를 이용해 [0, 2^16]으로 rescaling 한다.
+원본 이미지를 .dcm에서 .png로 변환해야한다. 변환해야 할 dcm파일을 script_for_copy_dcm.txt에 있는 script로 /hoem04/powergkrry/lv_challenge/data/original_dcm 에 복사한다. 그 후 dcm_to_png.m 으로 .png로 변환한다. 이 때 타입은은 uint8이며 이미지 확인을 위해 imadjust를 이용해 [0, 2^8]으로 rescaling 한다.
 
-데이터의 수가 부족하기 때문에 data augmentation을 위해 diffusion의 정도에 따라 다른 이미지를 만들어 이용해본다. make_diffusion_png.py 를 실행한다.
+데이터의 수가 부족하기 때문에 data augmentation을 위해 diffusion의 정도에 따라 다른 이미지를 만들어 이용해본다. make_diffusion_png.py 를 실행한다. 동시에 flip(horizon, vertical, both, none), rotate(right, left)를 진행한다.
 
-그 후 train test 데이터셋으로 분할하기 위해 make_traintest.py 를 실행한다. pcontour의 경우 총 161장의 사진이 있다. 이를 train 129장 test 32장으로 분할한다.
+그 후 train test 데이터셋으로 분할하기 위해 copy_img_dataset.sh 를 실행한다. pcontour의 경우 총 161장의 사진이 있다. 이를 train 129장 test 32장으로 분할한다.
