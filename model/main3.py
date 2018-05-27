@@ -15,54 +15,70 @@ import torchvision.transforms.functional as F
 def cal_test_error(i):
 
     num_test_img = len(os.listdir(tensor_test_output_dir + "o/"))
-    loss_sum = 0
-    loss_sum_rounded = 0
+    num_test_batch = num_test_img // batch_size
+    test_loss_sum = 0
+    test_loss_sum_rounded = 0
 
     print("num_test_img : "+str(num_test_img))
 
     for fliprot in fliprot_list:
-        fliprot_input_dir = tensor_test_input_dir + fliprot
-        fliprot_output_dir = tensor_test_output_dir + fliprot
-        tensor_list = os.listdir(fliprot_input_dir)
-        tensor_list.sort()
+        fliprot_test_input_dir = tensor_test_input_dir + fliprot
+        fliprot_test_output_dir = tensor_test_output_dir + fliprot
+        test_tensor_list = os.listdir(fliprot_test_input_dir)
+        test_tensor_list.sort()
 
-        for tensor in tensor_list:
-            x = torch.load(fliprot_input_dir + tensor)
-            x = Variable(x)
-            y_ = torch.load(fliprot_output_dir + tensor)
-            y_ = Variable(y_)
-            y = generator.forward(x)
-            y2 = torch.round(y)
+        idx = 0
+        for batch in range(num_test_batch):
+            #print("idx : "+str(idx))
+            x_test = [torch.load(fliprot_test_input_dir + test_tensor_list[idx+k]) for k in range(batch_size)]
+            x_test = torch.cat(x_test, dim=0)
+            x_test = Variable(x_test).cuda()
+            y__test = [torch.load(fliprot_test_output_dir + test_tensor_list[idx+k]) for k in range(batch_size)]
+            y__test = torch.cat(y__test, dim=0)
+            y__test = Variable(y__test).cuda()
 
-            loss = recon_loss_func(y,y_)
-            loss_sum += loss.data[0]
-            loss_rounded = recon_loss_func(y2,y_)
-            loss_sum_rounded += loss_rounded.data[0]
+            y_test = generator.forward(x_test)
+            y2_test = torch.round(y_test)
 
-            """
-            # tensorboard logging
-            if j == 0 and idx == 0:
-                #(1) Log the scalar values
-                logger.scalar_summary('test_loss', loss.data[0], i+1)
+            loss_test = recon_loss_func(y_test,y__test)
+            #loss_sum += loss.data[0]
+            test_loss_sum += (loss_test.item() * batch_size)
+            test_loss_rounded = recon_loss_func(y2_test,y__test)
+            #loss_sum_rounded += loss_rounded.data[0]
+            test_loss_sum_rounded += (test_loss_rounded.item() * batch_size)
 
-            """
-            """
-            if j == 0:
-                a[0][idx].imshow(x_test.data.cpu().numpy()[0][0].reshape(256,256),cmap='gray')
-                a[0][idx].set_xticks(()); a[0][idx].set_yticks(())
-                a[1][idx].imshow(y_test.data.cpu().numpy().reshape(256,256),cmap='gray')
-                a[1][idx].set_xticks(()); a[1][idx].set_yticks(())
-        
-        plt.show() 
-        """    
-    """
+            idx += batch_size
+
+        if idx < num_test_img:
+            #print("idx : "+str(idx))
+            x_test = [torch.load(fliprot_test_input_dir + test_tensor_list[idx+k]) for k in range(num_test_img - idx)]
+            x_test = torch.cat(x_test, dim=0)
+            x_test = Variable(x_test).cuda()
+            y__test = [torch.load(fliprot_test_output_dir + test_tensor_list[idx+k]) for k in range(num_test_img - idx)]
+            y__test = torch.cat(y__test, dim=0)
+            y__test = Variable(y__test).cuda()
+
+            y_test = generator.forward(x_test)
+            y2_test = torch.round(y_test)
+
+            test_loss = recon_loss_func(y_test,y__test)
+            #loss_sum += loss.data[0]
+            test_loss_sum += (test_loss.item() * batch_size)
+            test_loss_rounded = recon_loss_func(y2_test,y__test)
+            #loss_sum_rounded += loss_rounded.data[0]
+            test_loss_sum_rounded += (test_loss_rounded.item() * batch_size)
+
+
     if i == 0:
         v_utils.save_image(y__test.cpu().data,"./result/res_img/label_image.png")
     v_utils.save_image(y2_test.cpu().data,"./result/res_img/gen_image_{:03d}.png".format(i))
-    """
 
-    test_error_output = loss_sum / (num_test_img * len(fliprot_list))
-    test_error_output2 = loss_sum_rounded / (num_test_img * len(fliprot_list))
+    test_error_output = test_loss_sum / (num_test_img * len(fliprot_list))
+    test_error_output2 = test_loss_sum_rounded / (num_test_img * len(fliprot_list))
+
+    #tensorboard logging
+    logger.scalar_summary('test_loss', test_error_output, i+1)
+    logger.scalar_summary('test_loss_rounded', test_error_output2, i+1)
 
     #print("test_len :",len(iter_output_test))
     return test_error_output, test_error_output2
@@ -90,9 +106,10 @@ r_test_error = []
 
 # initiate Generator
 if args.network == "fusionnet":
-	#generator = nn.DataParallel(FusionGenerator(8,1,64),device_ids=[i for i in range(args.num_gpu)]).cuda()
+	#generator = nn.DataParallel(FusionGenerator(9,1,64),device_ids=[i for i in range(args.num_gpu)]).cuda()
+	generator = nn.DataParallel(FusionGenerator(9,1,64),device_ids=None).cuda()
 	#generator = nn.DataParallel(FusionGenerator(8,1,64),device_ids=[i for i in range(args.num_gpu)])
-	generator = nn.DataParallel(FusionGenerator(9,1,4),device_ids=[i for i in range(args.num_gpu)])
+	#generator = nn.DataParallel(FusionGenerator(9,1,4),device_ids=[i for i in range(args.num_gpu)])
 elif args.network == "unet":
 	generator = nn.DataParallel(UnetGenerator(9,1,64),device_ids=[i for i in range(args.num_gpu)]).cuda()
 
@@ -115,42 +132,68 @@ gen_optimizer = torch.optim.Adam(generator.parameters(),lr=lr)
 
 
 # training
-#file = open('./result/res_error/{}_{}_{}_{:03d}_loss'.format(args.network,args.batch_size,args.lr,args.epoch), 'w')
-#logger = Logger('./result/logs')
+file = open('./result/res_error/{}_{}_{}_{:03d}_loss'.format(args.network,args.batch_size,args.lr,args.epoch), 'w')
+logger = Logger('./result/logs')
 
-tensor_train_input_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/train/"
-tensor_train_output_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/train_output/"
-tensor_test_input_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/test/"
-tensor_test_output_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/test_output/"
+#tensor_train_input_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/train/"
+tensor_train_input_dir = "/home/image/lv_challenge/data/dataset_tensor/dataset/p/train/"
+#tensor_train_output_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/train_output/"
+tensor_train_output_dir = "/home/image/lv_challenge/data/dataset_tensor/dataset/p/train_output/"
+#tensor_test_input_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/test/"
+tensor_test_input_dir = "/home/image/lv_challenge/data/dataset_tensor/dataset/p/test/"
+#tensor_test_output_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/test_output/"
+tensor_test_output_dir = "/home/image/lv_challenge/data/dataset_tensor/dataset/p/test_output/"
 fliprot_list = ["h/","hv/","o/","rl/","rr/","v/"]
 num_img = len(os.listdir(tensor_train_input_dir + "o/"))
+num_batch = num_img // batch_size
 
 for i in range(epoch):
     loss_sum = 0
     loss_sum_rounded = 0
 
     for fliprot in fliprot_list:
-        print("num_train_img : "+str(num_img))
         fliprot_input_dir = tensor_train_input_dir + fliprot
         fliprot_output_dir = tensor_train_output_dir + fliprot
         tensor_list = os.listdir(fliprot_input_dir)
         tensor_list.sort()
+
+        idx = 0
+        for batch in range(num_batch):
+            #print("idx : "+str(idx))
+            x = [torch.load(fliprot_input_dir + tensor_list[idx+k]) for k in range(batch_size)]
+            x = torch.cat(x, dim=0)
+            x = Variable(x).cuda()
+            y_ = [torch.load(fliprot_output_dir + tensor_list[idx+k]) for k in range(batch_size)]
+            y_ = torch.cat(y_, dim=0)
+            y_ = Variable(y_).cuda()
+
+            """
+            print("x shape : "+str(x.shape))
+            print("y_ shape : "+str(y_.shape))
+            """ 
+
+            """
         for tensor in tensor_list:
             x = torch.load(fliprot_input_dir + tensor)
-            x = Variable(x)
+            x = Variable(x).cuda()
             y_ = torch.load(fliprot_output_dir + tensor)
-            y_ = Variable(y_)
+            y_ = Variable(y_).cuda()
+            """
+
             y = generator.forward(x)
             y2 = torch.round(y)
             gen_optimizer.zero_grad()
 
             loss = recon_loss_func(y,y_)
-            loss_sum += loss.data[0]
+            #loss_sum += loss.data[0]
+            loss_sum += (loss.item() * batch_size)
             loss_rounded = recon_loss_func(y2,y_)
-            loss_sum_rounded += loss_rounded.data[0]
+            #loss_sum_rounded += loss_rounded.data[0]
+            loss_sum_rounded += (loss_rounded.item() * batch_size)
 
             loss.backward()
             gen_optimizer.step()
+            idx += batch_size
 
             """
             if j == 0:
@@ -180,6 +223,34 @@ for i in range(epoch):
                     logger.image_summary(tag, images, epoch+1)
             """
 
+        if idx < num_img:
+            #print("idx : "+str(idx))
+            x = [torch.load(fliprot_input_dir + tensor_list[idx+k]) for k in range(num_img - idx)]
+            x = torch.cat(x, dim=0)
+            x = Variable(x).cuda()
+            y_ = [torch.load(fliprot_output_dir + tensor_list[idx+k]) for k in range(num_img - idx)]
+            y_ = torch.cat(y_, dim=0)
+            y_ = Variable(y_).cuda()
+
+            """
+            print("x shape : "+str(x.shape))
+            print("y_ shape : "+str(y_.shape))
+            """
+            
+            y = generator.forward(x)
+            y2 = torch.round(y)
+            gen_optimizer.zero_grad()
+
+            loss = recon_loss_func(y,y_)
+            #loss_sum += loss.data[0]
+            loss_sum += (loss.item() * (num_img-idx))
+            loss_rounded = recon_loss_func(y2,y_)
+            #loss_sum_rounded += loss_rounded.data[0]
+            loss_sum_rounded += (loss_rounded.item() * (num_img-idx))
+
+            loss.backward()
+            gen_optimizer.step()
+
     print(i)
     tr_er = loss_sum / (num_img * len(fliprot_list))
     r_tr_er = loss_sum_rounded / (num_img * len(fliprot_list))
@@ -190,6 +261,10 @@ for i in range(epoch):
     print("test error :",tst_er)
     print("rounded test error :",r_tst_er)
     print("\n")
+
+    #tensorboard logging
+    logger.scalar_summary('loss', tr_er, i+1)
+    
     train_error.append(tr_er)
     r_train_error.append(r_tr_er)
     test_error.append(tst_er)
@@ -201,6 +276,6 @@ for i in range(epoch):
     #v_utils.save_image(chunk.cpu().data,"./result/original_image_{}.png".format(i))
     #v_utils.save_image(y_.cpu().data,"./result/label_image_{}.png".format(i))
     #v_utils.save_image(y.cpu().data,"./result2/res_img/gen_image_{:03d}.png".format(i))
-    #torch.save(generator,'./trained/{}_{}.pkl'.format(args.network,i)) 
+    torch.save(generator,'./result/trained/{}_{}.pkl'.format(args.network,i)) 
 
-#file.write("train"+"\n"+str(train_error)+"\n"+"rounded train"+"\n"+str(r_train_error)+"\n"+"test"+"\n"+str(test_error)+"\n"+"rounded test"+"\n"+str(r_test_error))
+file.write("train"+"\n"+str(train_error)+"\n"+"rounded train"+"\n"+str(r_train_error)+"\n"+"test"+"\n"+str(test_error)+"\n"+"rounded test"+"\n"+str(r_test_error))
