@@ -169,7 +169,8 @@ img_output_batch_arr_test = data.DataLoader(img_output_arr_test, batch_size=batc
 # initiate Generator
 if args.network == "fusionnet":
 	#generator = nn.DataParallel(FusionGenerator(8,1,64),device_ids=[i for i in range(args.num_gpu)]).cuda()
-	generator = nn.DataParallel(FusionGenerator(8,1,64),device_ids=[i for i in range(args.num_gpu)])
+	#generator = nn.DataParallel(FusionGenerator(8,1,64),device_ids=[i for i in range(args.num_gpu)])
+	generator = nn.DataParallel(FusionGenerator(8,1,4),device_ids=[i for i in range(args.num_gpu)])
 elif args.network == "unet":
 	generator = nn.DataParallel(UnetGenerator(8,1,64),device_ids=[i for i in range(args.num_gpu)]).cuda()
 
@@ -209,7 +210,7 @@ for i in range(epoch):
         tensor_list = [[next(it)[0] for it in iter_a] for iter_a in iter_arr]
         tensor_o = next(iter_output)[0]
         tensor_o = tensor_o.view(-1,4,256,256)
-        
+           
         tensor_output = torch.chunk(tensor_o,chunks=4, dim=1)
         for idx in range(len(iter_arr)):
             all_diffusion = torch.cat(tensor_list[idx],dim=1)
