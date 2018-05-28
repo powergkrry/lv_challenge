@@ -150,7 +150,6 @@ num_img = len(os.listdir(tensor_train_input_dir + "o/"))
 num_batch = num_img // batch_size
 
 for i in range(epoch):
-    print(gen_optimizer)
     loss_sum = 0
     loss_sum_rounded = 0
 
