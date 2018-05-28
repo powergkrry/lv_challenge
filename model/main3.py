@@ -111,7 +111,8 @@ if args.network == "fusionnet":
 	#generator = nn.DataParallel(FusionGenerator(8,1,64),device_ids=[i for i in range(args.num_gpu)])
 	#generator = nn.DataParallel(FusionGenerator(9,1,4),device_ids=[i for i in range(args.num_gpu)])
 elif args.network == "unet":
-	generator = nn.DataParallel(UnetGenerator(9,1,64),device_ids=[i for i in range(args.num_gpu)]).cuda()
+	#generator = nn.DataParallel(UnetGenerator(9,1,64),device_ids=[i for i in range(args.num_gpu)]).cuda()
+        generator = nn.DataParallel(UnetGenerator(9,1,64),device_ids=None).cuda()
 
 
 """
@@ -129,6 +130,7 @@ print("\n--------model not restored--------\n")
 # loss function & optimizer
 recon_loss_func = nn.MSELoss()
 gen_optimizer = torch.optim.Adam(generator.parameters(),lr=lr)
+scheduler = torch.optim.lr_scheduler.StepLR(gen_optimizer, step_size=150, gamma=0.1)
 
 
 # training
@@ -136,18 +138,19 @@ file = open('./result/res_error/{}_{}_{}_{:03d}_loss'.format(args.network,args.b
 logger = Logger('./result/logs')
 
 #tensor_train_input_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/train/"
-tensor_train_input_dir = "/home/image/lv_challenge/data/dataset_tensor/dataset/p/train/"
+tensor_train_input_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/p/train/"
 #tensor_train_output_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/train_output/"
-tensor_train_output_dir = "/home/image/lv_challenge/data/dataset_tensor/dataset/p/train_output/"
+tensor_train_output_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/p/train_output/"
 #tensor_test_input_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/test/"
-tensor_test_input_dir = "/home/image/lv_challenge/data/dataset_tensor/dataset/p/test/"
+tensor_test_input_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/p/test/"
 #tensor_test_output_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/test_output/"
-tensor_test_output_dir = "/home/image/lv_challenge/data/dataset_tensor/dataset/p/test_output/"
+tensor_test_output_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/p/test_output/"
 fliprot_list = ["h/","hv/","o/","rl/","rr/","v/"]
 num_img = len(os.listdir(tensor_train_input_dir + "o/"))
 num_batch = num_img // batch_size
 
 for i in range(epoch):
+    print(gen_optimizer)
     loss_sum = 0
     loss_sum_rounded = 0
 
@@ -276,6 +279,7 @@ for i in range(epoch):
     #v_utils.save_image(chunk.cpu().data,"./result/original_image_{}.png".format(i))
     #v_utils.save_image(y_.cpu().data,"./result/label_image_{}.png".format(i))
     #v_utils.save_image(y.cpu().data,"./result2/res_img/gen_image_{:03d}.png".format(i))
-    torch.save(generator,'./result/trained/{}_{}.pkl'.format(args.network,i)) 
+    torch.save(generator,'./result/trained/{}_{}.pkl'.format(args.network,i))
+    scheduler.step()
 
 file.write("train"+"\n"+str(train_error)+"\n"+"rounded train"+"\n"+str(r_train_error)+"\n"+"test"+"\n"+str(test_error)+"\n"+"rounded test"+"\n"+str(r_test_error))
