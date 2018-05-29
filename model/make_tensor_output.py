@@ -10,7 +10,8 @@ flip = ['_o','_h','_v','hv']
 # input pipeline
 img_dir = "/home/yeonjee/lv_challenge/data/dataset/dataset04/"
 out_dir = "/home/yeonjee/lv_challenge/data/dataset/dataset04_tensor/"
-dir_list_iop = ["p/"]
+#dir_list_iop = ["p/"]
+dir_list_iop = ["i/","o/"]
 dir_list_traintest = ["train_output/","test_output/"]
 dir_list_fliprot = ["h/","hv/","o/","rl/","rr/","v/"]
 

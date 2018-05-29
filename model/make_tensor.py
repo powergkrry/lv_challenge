@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 num_diffuse = 9
 flip = ['_o','_h','_v','hv']
 # input pipeline
-img_dir = "/home/image/lv_challenge/data/dataset/dataset04/"
-out_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/"
+img_dir = "/home/yeonjee/lv_challenge/data/dataset/dataset04/"
+out_dir = "/home/yeonjee/lv_challenge/data/dataset/dataset04_tensor/"
 #dir_list_iop = ["p/"]
 dir_list_iop = ["i/","o/"]
 dir_list_traintest = ["train/","test/"]
