@@ -130,7 +130,7 @@ print("\n--------model not restored--------\n")
 # loss function & optimizer
 recon_loss_func = nn.MSELoss()
 gen_optimizer = torch.optim.Adam(generator.parameters(),lr=lr)
-scheduler = torch.optim.lr_scheduler.StepLR(gen_optimizer, step_size=150, gamma=0.1)
+scheduler = torch.optim.lr_scheduler.StepLR(gen_optimizer, step_size=100, gamma=0.1)
 
 
 # training
