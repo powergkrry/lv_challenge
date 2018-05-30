@@ -85,6 +85,6 @@ for fliprot in fliprot_list:
         y = generator.forward(x)
         y2 = torch.round(y)
 
-        v_utils.save_image(y2.cpu().data,"./result/res_img/{}_{}_output.png".format(tensor_list[batch][0:3],fliprot[0:len(fliprot)-1]))
+        folder2.save_image(y2.cpu().data,"./result/res_img/{}_{}_output.png".format(tensor_list[batch][0:3],fliprot[0:len(fliprot)-1]))
 
         idx += batch_size

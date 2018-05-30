@@ -134,3 +134,22 @@ class ImageFolder(data.Dataset):
         fmt_str += '{0}{1}'.format(tmp, self.target_transform.__repr__().replace('\n', '\n' + ' ' * len(tmp)))
         return fmt_str
 
+
+
+## etc
+def save_image(tensor, filename, nrow=8, padding=2,
+               normalize=False, range=None, scale_each=False, pad_value=0):
+    """Save a given Tensor into an image file.
+    Args:
+        tensor (Tensor or list): Image to be saved. If given a mini-batch tensor,
+            saves the tensor as a grid of images by calling ``make_grid``.
+        **kwargs: Other arguments are documented in ``make_grid``.
+    """
+    from PIL import Image
+    from torchvision.utils import make_grid
+    grid = make_grid(tensor, nrow=nrow, padding=padding, pad_value=pad_value,
+                     normalize=normalize, range=range, scale_each=scale_each)
+    ndarr = grid.mul(255).clamp(0, 255).byte().permute(1, 2, 0).cpu().numpy()
+    ndarr = ndarr[:,:,0]
+    im = Image.fromarray(ndarr, 'L')
+    im.save(filename)

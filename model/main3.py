@@ -38,7 +38,7 @@ def cal_test_error(i):
             y__test = Variable(y__test).cuda()
 
             y_test = generator.forward(x_test)
-            y2_test = torch.round(y_test)
+            y2_test = (y_test >= threshold).float() * 1
 
             loss_test = recon_loss_func(y_test,y__test)
             #loss_sum += loss.data[0]
@@ -59,7 +59,7 @@ def cal_test_error(i):
             y__test = Variable(y__test).cuda()
 
             y_test = generator.forward(x_test)
-            y2_test = torch.round(y_test)
+            y2_test = (y_test >= threshold).float() * 1
 
             test_loss = recon_loss_func(y_test,y__test)
             #loss_sum += loss.data[0]
@@ -70,8 +70,8 @@ def cal_test_error(i):
 
 
     if i == 0:
-        v_utils.save_image(y__test.cpu().data,"./result/res_img/label_image.png")
-    v_utils.save_image(y2_test.cpu().data,"./result/res_img/gen_image_{:03d}.png".format(i))
+        folder2.save_image(y__test.cpu().data,"./result/res_img/label_image.png")
+    folder2.save_image(y2_test.cpu().data,"./result/res_img/gen_image_{:03d}.png".format(i))
 
     test_error_output = test_loss_sum / (num_test_img * len(fliprot_list))
     test_error_output2 = test_loss_sum_rounded / (num_test_img * len(fliprot_list))
@@ -89,7 +89,7 @@ parser.add_argument("--network",type=str,default="fusionnet",help="choose betwee
 parser.add_argument("--batch_size",type=int,default=4,help="batch size")
 parser.add_argument("--lr",type=float,default=0.001,help="learning rate")
 parser.add_argument("--epoch",type=int,default=300,help="epoch")
-
+parser.add_argument("--threshold",type=float,default=0.5,help="threshold")
 parser.add_argument("--num_gpu",type=int,default=2,help="number of gpus")
 args = parser.parse_args()
 
@@ -98,6 +98,7 @@ args = parser.parse_args()
 batch_size = args.batch_size
 lr = args.lr
 epoch = args.epoch
+threshold = Variable(torch.Tensor([args.threshold])).cuda()
 img_size = 256
 train_error = []
 r_train_error =[]
@@ -130,7 +131,7 @@ print("\n--------model not restored--------\n")
 # loss function & optimizer
 recon_loss_func = nn.MSELoss()
 gen_optimizer = torch.optim.Adam(generator.parameters(),lr=lr)
-scheduler = torch.optim.lr_scheduler.StepLR(gen_optimizer, step_size=100, gamma=0.1)
+#scheduler = torch.optim.lr_scheduler.StepLR(gen_optimizer, step_size=150, gamma=0.1)
 
 
 # training
@@ -138,13 +139,13 @@ file = open('./result/res_error/{}_{}_{}_{:03d}_loss'.format(args.network,args.b
 logger = Logger('./result/logs')
 
 #tensor_train_input_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/train/"
-tensor_train_input_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/p/train/"
+tensor_train_input_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/i/train/"
 #tensor_train_output_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/train_output/"
-tensor_train_output_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/p/train_output/"
+tensor_train_output_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/i/train_output/"
 #tensor_test_input_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/test/"
-tensor_test_input_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/p/test/"
+tensor_test_input_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/i/test/"
 #tensor_test_output_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/test_output/"
-tensor_test_output_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/p/test_output/"
+tensor_test_output_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/i/test_output/"
 fliprot_list = ["h/","hv/","o/","rl/","rr/","v/"]
 num_img = len(os.listdir(tensor_train_input_dir + "o/"))
 num_batch = num_img // batch_size
@@ -183,7 +184,7 @@ for i in range(epoch):
             """
 
             y = generator.forward(x)
-            y2 = torch.round(y)
+            y2 = (y >= threshold).float() * 1
             gen_optimizer.zero_grad()
 
             loss = recon_loss_func(y,y_)
@@ -240,7 +241,7 @@ for i in range(epoch):
             """
             
             y = generator.forward(x)
-            y2 = torch.round(y)
+            y2 = (y >= threshold).float() * 1
             gen_optimizer.zero_grad()
 
             loss = recon_loss_func(y,y_)
@@ -278,7 +279,7 @@ for i in range(epoch):
     #v_utils.save_image(chunk.cpu().data,"./result/original_image_{}.png".format(i))
     #v_utils.save_image(y_.cpu().data,"./result/label_image_{}.png".format(i))
     #v_utils.save_image(y.cpu().data,"./result2/res_img/gen_image_{:03d}.png".format(i))
-    torch.save(generator,'./result/trained/{}_{}.pkl'.format(args.network,i))
-    scheduler.step()
+    torch.save(generator,'./result/trained/{}_{:03d}.pkl'.format(args.network,i))
+    #scheduler.step()
 
 file.write("train"+"\n"+str(train_error)+"\n"+"rounded train"+"\n"+str(r_train_error)+"\n"+"test"+"\n"+str(test_error)+"\n"+"rounded test"+"\n"+str(r_test_error))
