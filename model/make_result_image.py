@@ -45,7 +45,7 @@ elif args.network == "unet":
 
 # load pretrained model
 try:
-    generator = torch.load('./result/trained/{}_{}.pkl'.format(args.network, 299))
+    generator = torch.load('./result/trained/{}_pre_{}.pkl'.format(args.network, '005'))
     print("\n--------model restored--------\n")
 except:
     print("\n--------model not restored--------\n")
@@ -59,13 +59,13 @@ gen_optimizer = torch.optim.Adam(generator.parameters(),lr=lr)
 
 # training
 #tensor_train_input_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/train/"
-tensor_train_input_dir = "/home/image/lv_challenge/data/dataset_tensor/dataset/p/train/"
+tensor_train_input_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/i/train/"
 #tensor_train_output_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/train_output/"
-tensor_train_output_dir = "/home/image/lv_challenge/data/dataset_tensor/dataset/p/train_output/"
+tensor_train_output_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/i/train_output/"
 #tensor_test_input_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/test/"
-tensor_test_input_dir = "/home/image/lv_challenge/data/dataset_tensor/dataset/p/test/"
+tensor_test_input_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/i/test/"
 #tensor_test_output_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/test_output/"
-tensor_test_output_dir = "/home/image/lv_challenge/data/dataset_tensor/dataset/p/test_output/"
+tensor_test_output_dir = "/home/image/lv_challenge/data/dataset/dataset04_tensor/i/test_output/"
 fliprot_list = ["h/","hv/","o/","rl/","rr/","v/"]
 num_img = len(os.listdir(tensor_test_input_dir + "o/"))
 num_batch = num_img // batch_size
