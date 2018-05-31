@@ -40,12 +40,10 @@ def cal_test_error(i):
             y_test = generator.forward(x_test)
             y2_test = (y_test >= threshold).float() * 1
 
-            loss_test = recon_loss_func(y_test,y__test)
-            #loss_sum += loss.data[0]
-            test_loss_sum += (loss_test.item() * batch_size)
-            test_loss_rounded = recon_loss_func(y2_test,y__test)
-            #loss_sum_rounded += loss_rounded.data[0]
-            test_loss_sum_rounded += (test_loss_rounded.item() * batch_size)
+            test_loss = recon_loss_func(y_test,y__test)
+            test_loss_sum += (test_loss.item() * batch_size)
+            #test_loss_rounded = recon_loss_func(y2_test,y__test)
+            #test_loss_sum_rounded += (test_loss_rounded.item() * batch_size)
 
             idx += batch_size
 
@@ -62,11 +60,9 @@ def cal_test_error(i):
             y2_test = (y_test >= threshold).float() * 1
 
             test_loss = recon_loss_func(y_test,y__test)
-            #loss_sum += loss.data[0]
             test_loss_sum += (test_loss.item() * batch_size)
-            test_loss_rounded = recon_loss_func(y2_test,y__test)
-            #loss_sum_rounded += loss_rounded.data[0]
-            test_loss_sum_rounded += (test_loss_rounded.item() * batch_size)
+            #test_loss_rounded = recon_loss_func(y2_test,y__test)
+            #test_loss_sum_rounded += (test_loss_rounded.item() * batch_size)
 
 
     if i == 0:
@@ -74,14 +70,14 @@ def cal_test_error(i):
     folder2.save_image(y2_test.cpu().data,"./result/res_img/gen_image_{:03d}.png".format(i))
 
     test_error_output = test_loss_sum / (num_test_img * len(fliprot_list))
-    test_error_output2 = test_loss_sum_rounded / (num_test_img * len(fliprot_list))
+    #test_error_output2 = test_loss_sum_rounded / (num_test_img * len(fliprot_list))
 
     #tensorboard logging
     logger.scalar_summary('test_loss', test_error_output, i+1)
-    logger.scalar_summary('test_loss_rounded', test_error_output2, i+1)
+    #logger.scalar_summary('test_loss_rounded', test_error_output2, i+1)
 
     #print("test_len :",len(iter_output_test))
-    return test_error_output, test_error_output2
+    return test_error_output#, test_error_output2
 
 
 parser = argparse.ArgumentParser()
@@ -119,7 +115,7 @@ elif args.network == "unet":
 """
 # load pretrained model
 try:
-    generator = torch.load('./model/{}.pkl'.format(args.network))
+    generator = torch.load('./result/trained/{}_{}.pkl'.format(args.network,'035'))
     print("\n--------model restored--------\n")
 except:
     print("\n--------model not restored--------\n")
@@ -131,11 +127,11 @@ print("\n--------model not restored--------\n")
 # loss function & optimizer
 recon_loss_func = nn.MSELoss()
 gen_optimizer = torch.optim.Adam(generator.parameters(),lr=lr)
-#scheduler = torch.optim.lr_scheduler.StepLR(gen_optimizer, step_size=150, gamma=0.1)
+scheduler = torch.optim.lr_scheduler.StepLR(gen_optimizer, step_size=40, gamma=0.1)
 
 
 # training
-file = open('./result/res_error/{}_{}_{}_{:03d}_loss'.format(args.network,args.batch_size,args.lr,args.epoch), 'w')
+file = open('./result/res_error/2_{}_loss'.format(args.network), 'w')
 logger = Logger('./result/logs')
 
 #tensor_train_input_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/train/"
@@ -188,11 +184,9 @@ for i in range(epoch):
             gen_optimizer.zero_grad()
 
             loss = recon_loss_func(y,y_)
-            #loss_sum += loss.data[0]
             loss_sum += (loss.item() * batch_size)
-            loss_rounded = recon_loss_func(y2,y_)
-            #loss_sum_rounded += loss_rounded.data[0]
-            loss_sum_rounded += (loss_rounded.item() * batch_size)
+            #loss_rounded = recon_loss_func(y2,y_)
+            #loss_sum_rounded += (loss_rounded.item() * batch_size)
 
             loss.backward()
             gen_optimizer.step()
@@ -245,41 +239,33 @@ for i in range(epoch):
             gen_optimizer.zero_grad()
 
             loss = recon_loss_func(y,y_)
-            #loss_sum += loss.data[0]
             loss_sum += (loss.item() * (num_img-idx))
-            loss_rounded = recon_loss_func(y2,y_)
-            #loss_sum_rounded += loss_rounded.data[0]
-            loss_sum_rounded += (loss_rounded.item() * (num_img-idx))
+            #loss_rounded = recon_loss_func(y2,y_)
+            #loss_sum_rounded += (loss_rounded.item() * (num_img-idx))
 
             loss.backward()
             gen_optimizer.step()
 
     print(i)
     tr_er = loss_sum / (num_img * len(fliprot_list))
-    r_tr_er = loss_sum_rounded / (num_img * len(fliprot_list))
-    tst_er, r_tst_er = cal_test_error(i)
+    #r_tr_er = loss_sum_rounded / (num_img * len(fliprot_list))
+    tst_er = cal_test_error(i)
     #print("len :",len(iter_output)*len(iter_arr))
     print("train error :",tr_er)
-    print("rounded train error :",r_tr_er)
+    #print("rounded train error :",r_tr_er)
     print("test error :",tst_er)
-    print("rounded test error :",r_tst_er)
+    #print("rounded test error :",r_tst_er)
     print("\n")
 
     #tensorboard logging
     logger.scalar_summary('loss', tr_er, i+1)
     
     train_error.append(tr_er)
-    r_train_error.append(r_tr_er)
+    #r_train_error.append(r_tr_er)
     test_error.append(tst_er)
-    r_test_error.append(r_tst_er)
+    #r_test_error.append(r_tst_er)
 
-    #chunk, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ = torch.chunk(x, chunks=33, dim=1)
-    #plt.imshow(chunk.data.cpu().numpy().reshape(256,256), cmap='gray')
-    #plt.show()
-    #v_utils.save_image(chunk.cpu().data,"./result/original_image_{}.png".format(i))
-    #v_utils.save_image(y_.cpu().data,"./result/label_image_{}.png".format(i))
-    #v_utils.save_image(y.cpu().data,"./result2/res_img/gen_image_{:03d}.png".format(i))
-    torch.save(generator,'./result/trained/{}_{:03d}.pkl'.format(args.network,i))
-    #scheduler.step()
+    torch.save(generator,'./result/trained/2_{}_{:03d}.pkl'.format(args.network,i))
+    scheduler.step()
 
 file.write("train"+"\n"+str(train_error)+"\n"+"rounded train"+"\n"+str(r_train_error)+"\n"+"test"+"\n"+str(test_error)+"\n"+"rounded test"+"\n"+str(r_test_error))
