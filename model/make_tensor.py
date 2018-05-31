@@ -8,15 +8,15 @@ import matplotlib.pyplot as plt
 num_diffuse = 9
 flip = ['_o','_h','_v','hv']
 # input pipeline
-img_dir = "/home/yeonjee/lv_challenge/data/dataset/dataset04/"
-out_dir = "/home/yeonjee/lv_challenge/data/dataset/dataset04_tensor/"
+img_dir = "/home/powergkrry/lv_challenge/data/dataset/dataset04/"
+out_dir = "/home/powergkrry/lv_challenge/data/dataset/dataset04_crop_tensor/"
 #dir_list_iop = ["p/"]
-dir_list_iop = ["i/","o/"]
+dir_list_iop = ["o/"]
 dir_list_traintest = ["train/","test/"]
 dir_list_fliprot = ["h/","hv/","o/","rl/","rr/","v/"]
 
 for iop in dir_list_iop:
-    os.mkdir(out_dir + iop)
+    #os.mkdir(out_dir + iop)
     for traintest in dir_list_traintest:
         os.mkdir(out_dir + iop + traintest)
 
@@ -28,7 +28,10 @@ for iop in dir_list_iop:
 
             img_folder = folder2.ImageFolder(
                 root = img_dir + iop + traintest + fliprot,
-                transform = transforms.ToTensor(),
+                transform = transforms.Compose([
+                    transforms.CenterCrop(100),
+                    transforms.ToTensor(),
+                ])
             )
             img_dataloader = data.DataLoader(
                 img_folder,
