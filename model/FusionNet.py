@@ -77,12 +77,12 @@ class FusionGenerator(nn.Module):
             if isinstance(m, nn.Conv2d):
                 m.weight.data.normal_(0.0, 0.02)
                 #m.bias.data.fill_(0)
-                m.bias.data.fill_(0.1)
+                m.bias.data.fill_(0.0000000000000001)
             
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.normal_(1.0, 0.02)
                 #m.bias.data.fill_(0)
-                m.bias.data.fill_(0.1)
+                m.bias.data.fill_(0.0000000000000001)
 
 
     def forward(self,input):

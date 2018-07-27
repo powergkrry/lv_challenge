@@ -2,16 +2,17 @@ import torch
 import os
 import matplotlib.pyplot as plt
 
-img_dir = "/home/yeonjee/lv_challenge/data/dataset_tensor/dataset/p/train_output/v/"
+img_dir = "/home/powergkrry/lv_challenge/data/dataset/temp/i/test_output/o/"
 tensor_list = os.listdir(img_dir)
 tensor_list.sort()
 
 print(len(tensor_list))
 print(tensor_list)
 for i in range(len(tensor_list)):
-    tens = torch.load(img_dir + tensor_list[i])
-    plt.imshow(tens.numpy().reshape(256,256),cmap='gray')
-    plt.show()
+    if i>200 :
+        tens = torch.load(img_dir + tensor_list[i])
+        plt.imshow(tens.numpy().reshape(100,100),cmap='gray')
+        plt.show()
     """
     a1, _,_,_,_,_,_,_,_= torch.chunk(tens, chunks = 9, dim = 1)
     if i == 2:

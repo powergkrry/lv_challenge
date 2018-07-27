@@ -11,7 +11,7 @@ function [P,R,F,U]=computeFmeasure(G,H)
  
  P=P1; R=R1; F=F1;
  
- if 0
+ if 0,
    H=1-H;
    P2=sum(sum( G.*H )) ./ sum(sum(H));
    R2=sum(sum( G.*H )) ./ sum(sum(G));

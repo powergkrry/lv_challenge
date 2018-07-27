@@ -11,3 +11,18 @@ contour파일을 무엇과 매칭시킬지 알았으니 contour파일의 이름�
 데이터의 수가 부족하기 때문에 data augmentation을 위해 diffusion의 정도에 따라 다른 이미지를 만들어 이용해본다. make_diffusion_png.py 를 실행한다. 동시에 flip(horizon, vertical, both, none), rotate(right, left)를 진행한다.
 
 그 후 train test 데이터셋으로 분할하기 위해 copy_img_dataset.sh 를 실행한다. pcontour의 경우 총 161장의 사진이 있다. 이를 train 129장 test 32장으로 분할한다.
+
+"/home/yeonjee/lv_challenge/data/raw/ioriginal_png/"에 원본 이미지 저장. input / output 따로 실행할 것이므로 각각 저장시켜줘야 함.
+
+make_rawT.py 로 텐서 만들어 줌 input / output을 따로 실행해줘야 함.
+
+copy_img_dataset.sh 로 train / test 분할. datasetNN 안에 만들어줌.
+
+make_tensor2.py 로 channel을 합쳐줌. datasetNN_tensor 만들어줌.
+
+
+학습
+cencrop 진행 : 모형 단순, 정확도 차이 거의 없음
+bias : 0일 때 이상함. 하지만 매우 작은 수의 경우 더 잘 학습됨
+lr : 0.01로 30번 0.001로 30번 진행?
+layer : 64. 128로 해도 정확도 차이 없음
